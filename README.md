@@ -1,8 +1,8 @@
-Master branch has the exercise materials
-Project branch has the project
+**Master branch has the exercise materials**
+**Project branch has the project**
 
 
-Running and Compiling Instructions
+**Running and Compiling Instructions**
 
 Clone the repository from GitHub
 Open Android Studio
