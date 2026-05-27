@@ -1,16 +1,25 @@
 package com.example.sds_exercises;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.Display;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+
+// this is the activity which is shown when user presses a habit in the second activity
 public class DetailActivity extends AppCompatActivity {
+
+    TextView detailName;
+    TextView detailCategory;
+    TextView detailStreak;
+    TextView detailStatus;
+    Button deleteButton;
+
+    int habitIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,43 +27,38 @@ public class DetailActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail);
 
-        Intent in = getIntent();
-        int index = in.getIntExtra("com.example.sds_exercises.ITEM_INDEX", -1);
+        // get components
+        detailName = findViewById(R.id.detailName);
+        detailCategory = findViewById(R.id.detailCategory);
+        detailStreak = findViewById(R.id.detailStreak);
+        detailStatus = findViewById(R.id.detailStatus);
+        deleteButton = findViewById(R.id.deleteButton);
 
-        if (index > -1){
-            int pic = getImg(index);
-            ImageView img = (ImageView) findViewById(R.id.imageView);
-            scaleImg(img,pic);
-        }
-    }
+        // get the habit index passed from secondactivity
+        habitIndex = getIntent().getIntExtra("com.example.sds_exercises.ITEM_INDEX", -1);
 
-    private int getImg(int index){
-        switch (index){
-            case 0: return R.drawable.peach;
-            case 1: return R.drawable.tomato;
-            case 2: return R.drawable.squash;
-            default: return -1;
-        }
-    }
-    private void scaleImg(ImageView img, int pic){
 
-        Display screen = getWindowManager().getDefaultDisplay();
-        BitmapFactory.Options options = new BitmapFactory.Options();
+        // check that the index is valid before touching habit list
+        if (habitIndex >= 0 && habitIndex < HabitManager.getHabits().size()) {
+            Habit habit = HabitManager.getHabits().get(habitIndex);
 
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(getResources(), pic, options);
-        int imgWidth = options.outWidth;
-        int screenWidth = screen.getWidth();
+            // populate UI fields with habit's data
+            detailName.setText(habit.name);
+            detailCategory.setText("Category: " + habit.category);
+            detailStreak.setText("🔥 " + habit.streak + " day streak");
 
-        if (imgWidth>screenWidth){
-            int ratio = Math.round( (float)imgWidth / (float)screenWidth);
-            options.inSampleSize = ratio;
+            // ternary operator, shows different text on whether habit is marked done or not
+            detailStatus.setText(habit.completedToday ? "✅ Done today!" : "Not done yet today");
         }
 
-        options.inJustDecodeBounds = false;
-        Bitmap scaledImg = BitmapFactory.decodeResource(getResources(), pic,options);
-        img.setImageBitmap(scaledImg);
-
+        // deletion of habit
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HabitManager.removeHabit(habitIndex);
+                Toast.makeText(DetailActivity.this, "Habit deleted", Toast.LENGTH_SHORT).show();
+                finish(); // go back to secondactivity after deletion
+            }
+        });
     }
-
 }
